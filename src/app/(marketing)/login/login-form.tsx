@@ -9,11 +9,12 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
+import { safeInternalPath } from "@/lib/safe-internal-path";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl = safeInternalPath(searchParams.get("callbackUrl"), "/dashboard");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -1,6 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isPublicHttps } from "@/lib/request-https";
 
 /**
  * يجب عدم استيراد `auth` من `@/auth` هنا: ذلك يسحب Mongoose إلى بيئة Edge
@@ -10,7 +11,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
-  const secureCookie = request.nextUrl.protocol === "https:";
+  const secureCookie = isPublicHttps(request);
 
   const token =
     secret &&
