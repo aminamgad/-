@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Menu,
   Settings,
+  Shield,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 
-const nav = [
+const baseNav = [
   { href: "/dashboard", label: "نظرة عامة", icon: LayoutDashboard },
   { href: "/dashboard/appointments", label: "المواعيد", icon: CalendarDays },
   { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
@@ -22,11 +23,20 @@ const nav = [
 
 export function DashboardShell({
   userName,
+  isAdmin,
   children,
 }: {
   userName: string;
+  /** يظهر رابط لوحة الإدارة للمسؤولين فقط */
+  isAdmin?: boolean;
   children: React.ReactNode;
 }) {
+  const nav = isAdmin
+    ? [
+        ...baseNav,
+        { href: "/admin", label: "الإدارة", icon: Shield },
+      ]
+    : baseNav;
   const pathname = usePathname();
   const open = useUiStore((s) => s.dashboardSidebarOpen);
   const setOpen = useUiStore((s) => s.setDashboardSidebarOpen);
@@ -65,7 +75,9 @@ export function DashboardShell({
             const active =
               item.href === "/dashboard"
                 ? pathname === "/dashboard"
-                : pathname.startsWith(item.href);
+                : item.href === "/admin"
+                  ? pathname.startsWith("/admin")
+                  : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}

@@ -43,9 +43,9 @@ export function DoctorCard({ doctor, index }: { doctor: PublicDoctor; index: num
           <p className="text-sm text-muted-foreground">
             {doctor.reviewCount}+ تقييم من المرضى
           </p>
-          <Link href="/login" className="block">
+          <Link href={`/book?doctor=${doctor.id}`} className="block">
             <Button variant="secondary" className="w-full min-h-12 text-base">
-              عرض التفاصيل
+              احجز موعد
             </Button>
           </Link>
         </div>

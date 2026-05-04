@@ -81,8 +81,29 @@ export async function POST() {
     }
   }
 
+  const adminEmail = process.env.ADMIN_SEED_EMAIL?.trim().toLowerCase();
+  const adminPass = process.env.ADMIN_SEED_PASSWORD;
+  if (adminEmail && adminPass) {
+    const passwordHash = await bcrypt.hash(adminPass, 12);
+    const existing = await User.findOne({ email: adminEmail });
+    if (existing) {
+      existing.role = "admin";
+      existing.passwordHash = passwordHash;
+      await existing.save();
+    } else {
+      await User.create({
+        email: adminEmail,
+        name: "مدير النظام",
+        passwordHash,
+        role: "admin",
+      });
+    }
+  }
+
   return NextResponse.json({
     ok: true,
-    message: "تم البذر: demo@mednova.local / demo12345",
+    message:
+      "تم البذر: demo@mednova.local / demo12345" +
+      (adminEmail ? ` — مدير: ${adminEmail}` : ""),
   });
 }

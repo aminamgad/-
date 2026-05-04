@@ -8,6 +8,8 @@ export interface IAppointment {
   date: Date;
   status: AppointmentStatus;
   notes?: string;
+  /** يُضبط بعد إرسال بريد التذكير بنجاح */
+  reminderSentAt?: Date;
 }
 
 const AppointmentSchema = new Schema<IAppointment>(
@@ -30,6 +32,7 @@ const AppointmentSchema = new Schema<IAppointment>(
       default: "قيد الانتظار",
     },
     notes: { type: String },
+    reminderSentAt: { type: Date },
   },
   { timestamps: true },
 );

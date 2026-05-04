@@ -13,7 +13,10 @@ export default async function DashboardLayout({
   }
 
   return (
-    <DashboardShell userName={session.user.name ?? ""}>
+    <DashboardShell
+      userName={session.user.name ?? ""}
+      isAdmin={session.user.role === "admin"}
+    >
       {children}
     </DashboardShell>
   );

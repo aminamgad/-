@@ -48,7 +48,7 @@ export function Hero() {
             transition={{ duration: 0.5, delay: 0.18 }}
             className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center"
           >
-            <Link href="/login" className="sm:w-auto">
+            <Link href="/book" className="sm:w-auto">
               <Button variant="gradient" size="lg" className="w-full gap-2 sm:w-auto">
                 <CalendarHeart className="h-6 w-6" aria-hidden />
                 احجز موعد الآن

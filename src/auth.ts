@@ -26,10 +26,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!userDoc?.passwordHash) return null;
         const valid = await bcrypt.compare(password, userDoc.passwordHash);
         if (!valid) return null;
+        const u = userDoc as { _id: unknown; email: string; name: string; role?: string };
+        const role = u.role === "admin" ? "admin" : "user";
         return {
           id: String(userDoc._id),
           email: userDoc.email,
           name: userDoc.name,
+          role,
         };
       },
     }),
@@ -38,12 +41,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role =
+          "role" in user && (user as { role?: string }).role === "admin"
+            ? "admin"
+            : "user";
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string;
+        session.user.role = token.role === "admin" ? "admin" : "user";
       }
       return session;
     },

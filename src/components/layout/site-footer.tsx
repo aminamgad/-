@@ -24,6 +24,12 @@ export function SiteFooter() {
             <Link href="/register" className="text-muted-foreground hover:text-primary">
               إنشاء حساب
             </Link>
+            <Link href="/book" className="text-muted-foreground hover:text-primary">
+              احجز موعد
+            </Link>
+            <Link href="/contact" className="text-muted-foreground hover:text-primary">
+              اتصل بنا
+            </Link>
           </div>
           <div className="flex flex-col gap-3">
             <span className="font-semibold text-foreground">قانوني</span>

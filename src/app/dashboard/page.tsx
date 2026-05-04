@@ -1,11 +1,25 @@
+import Link from "next/link";
 import { auth } from "@/auth";
 import { Activity, CalendarCheck, Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { AppointmentFilterLinks } from "@/components/dashboard/appointment-filter-links";
+import { AppointmentsTable } from "@/components/dashboard/appointments-table";
+import { ExportAppointmentsCsv } from "@/components/dashboard/export-appointments-csv";
 import { getAppointmentsForUser } from "@/lib/appointments-list";
-import { formatArabicDateTime } from "@/lib/dates";
 import { getDashboardStatsSlice } from "@/lib/dashboard-stats";
+import {
+  filterAppointmentsForDashboard,
+  parseAppointmentFilter,
+} from "@/lib/appointment-filters";
 
-export default async function DashboardPage() {
+type PageProps = {
+  searchParams: Promise<{ filter?: string }>;
+};
+
+export default async function DashboardPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const filter = parseAppointmentFilter(sp.filter);
+
   const session = await auth();
   const rows = session?.user?.id
     ? await getAppointmentsForUser(session.user.id)
@@ -34,12 +48,25 @@ export default async function DashboardPage() {
     },
   ];
 
+  const filtered = filterAppointmentsForDashboard(rows, filter);
+
+  const emptyFilteredHint =
+    rows.length > 0 && filtered.length === 0
+      ? "لا توجد مواعيد تطابق هذا الفلتر — جرّب «الكل» أو «قادمة»."
+      : undefined;
+
   return (
     <div className="space-y-10">
-      <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <p className="text-lg text-muted-foreground">
           نظرة سريعة على مواعيدك ومؤشرات الرعاية.
         </p>
+        <Link
+          href="/book"
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-base font-semibold text-primary-foreground shadow-md hover:bg-primary/90"
+        >
+          احجز موعداً جديداً
+        </Link>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -62,53 +89,24 @@ export default async function DashboardPage() {
       </div>
 
       <Card className="overflow-hidden">
-        <div className="border-b border-border/80 bg-muted/40 px-6 py-4">
-          <h2 className="font-heading text-xl font-bold">جدول المواعيد</h2>
-          <p className="text-sm text-muted-foreground">
-            التواريخ بالتقويم الميلادي بصيغة عربية محلية.
-          </p>
+        <div className="flex flex-col gap-4 border-b border-border/80 bg-muted/40 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-heading text-xl font-bold">جدول المواعيد</h2>
+            <p className="text-sm text-muted-foreground">
+              التواريخ بالتقويم الميلادي بصيغة عربية محلية.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <ExportAppointmentsCsv />
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-start">
-            <thead>
-              <tr className="border-b border-border/80 bg-muted/30 text-sm text-muted-foreground">
-                <th className="px-6 py-4 font-semibold">الطبيب</th>
-                <th className="px-6 py-4 font-semibold">الموعد</th>
-                <th className="px-6 py-4 font-semibold">الحالة</th>
-                <th className="px-6 py-4 font-semibold">ملاحظات</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">
-                    لا توجد مواعيد بعد. جرّب الحجز من الصفحة الرئيسية بعد تسجيل الدخول.
-                  </td>
-                </tr>
-              ) : (
-                rows.map((r) => (
-                  <tr
-                    key={r.id}
-                    className="border-b border-border/60 last:border-0 hover:bg-muted/20"
-                  >
-                    <td className="px-6 py-4 font-medium">{r.doctorName}</td>
-                    <td className="px-6 py-4 text-muted-foreground">
-                      {formatArabicDateTime(r.date)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex rounded-full bg-secondary/15 px-3 py-1 text-sm font-medium text-secondary">
-                        {r.status}
-                      </span>
-                    </td>
-                    <td className="max-w-xs truncate px-6 py-4 text-muted-foreground">
-                      {r.notes ?? "—"}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        <div className="border-b border-border/60 px-6 py-4">
+          <AppointmentFilterLinks current={filter} basePath="/dashboard" />
         </div>
+        <AppointmentsTable
+          rows={filtered}
+          emptyHint={emptyFilteredHint}
+        />
       </Card>
     </div>
   );
